@@ -1,7 +1,7 @@
 import xlrd
 from queue import PriorityQueue
 
-class State(object):
+class Node(object):
 
     '''
     Steps:
@@ -17,6 +17,7 @@ class State(object):
         self.children = []
         self.parent = parent
         self.name = name
+        self.cost = 0
         self.aerialdist = 0
         self.walkingdist = 0
 
@@ -36,12 +37,13 @@ class State(object):
     def CreateChildren(self):
         pass
 
-class State_String(State):
-    def __init__(self,name,parent,
+class City_Node(Node):
+    def __init__(self,name,parent,cost,
                  start = 0,
                  goal = 0):
 
-        super(State_String, self).__init__(name, parent, start, goal)
+        super(City_Node, self).__init__(name, parent, start, goal)
+        self.cost = parent.cost + cost
         self.aerialdist = self.GetAerialDistance()
         self.walkindist = self.GetWalkingDistance()
 
@@ -69,39 +71,36 @@ class State_String(State):
             for i in range(driving_sheet.ncols):
                 
                 if (str(driving_sheet.cell_value(o,i)) != ""):
-                    name = driving_shee.cell_value(0,i)
-                child = State_String(name, self)
+                    name = driving_sheet.cell_value(0,i)
+                child = City_Node(name, self, driving_sheet.cell_value(o,i)
                 self.children.append(child)
 
 class AStar_Solver:
-    def __init__(self, start , goal):
+    def __init__(self, start , goal, heuristic):
         self.path          = []
         self.visitedQueue  = []
         self.priorityQueue = PriorityQueue()
         self.start         = start
         self.goal          = goal
+        self.heuristric    = heuristic
 
     def Solve(self):
-        startState = State_String(self.start,
-                                  0,
+        startState = City_Node(self.start, 0, 0,
                                   self.start,
                                   self.goal)
 
-        count = 0
-        self.priorityQueue.put((0,count,startState))
+        self.priorityQueue.put((startState.cost + startState.aerialdist, startState))
 
         while(not self.path and self.priorityQueue.qsize()):
-            closestChild = self.priorityQueue.get()[2]
+            closestChild = self.priorityQueue.get()[1]
             closestChild.CreateChildren()
             self.visitedQueue.append(closestChild.name)
-
+            if (closestChild.name == self.goal):
+                self.path = closestChild.path
+                break
             for child in closestChild.children:
                 if child.name not in self.visitedQueue:
-                    count +=1
-                    if not child.dist:
-                        self.path = child.path
-                        break
-                    self.priorityQueue.put((child.dist,count,child))
+                    self.priorityQueue.put((child.cost + child.aerialdist, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -109,7 +108,7 @@ class AStar_Solver:
         return self.path
 
 def SearchSheet(sheet, name):
-    for o in range(sheet.rows):
+    for o in range(sheet.nrows):
         if (sheet.cell_value(o,0) == name):
             return o
 
@@ -124,7 +123,7 @@ if __name__ == "__main__":
     goal1  = "Safad"
     print("Starting...")
 
-    a = AStar_Solver(start1, goal1)
+    a = AStar_Solver(start1, goal1, 1)
     a.Solve()
 
     for i in range(len(a.path)):
