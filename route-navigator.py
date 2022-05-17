@@ -83,14 +83,14 @@ class AStar_Solver:         #A* algorithm solver class
         self.heuristic    = heuristic
         self.cost          = 0
 
-    def Solve(self):
+    def Solve(self):        #Solving algorithm method
         startState = City_Node(self.start, 0, 0,
                                   self.start,
                                   self.goal)
 
         count = 0
         if self.heuristic == 1:
-            self.priorityQueue.put((startState.cost + startState.aerialdist, count, startState))
+            self.priorityQueue.put((startState.cost + startState.aerialdist, count, startState))#priority = cumelative cost + heuristic
         elif self.heuristic == 2:
             self.priorityQueue.put((startState.cost + startState.walkingdist, count, startState))
         while(self.priorityQueue.qsize()):
@@ -116,7 +116,7 @@ class AStar_Solver:         #A* algorithm solver class
 
         return self.path
 
-class Greedy_Solver:
+class Greedy_Solver:        #Greedy search pathfinding algorithm class
     def __init__(self, start , goal, heuristic):
         self.path          = []
         self.visitedQueue  = []
@@ -126,14 +126,14 @@ class Greedy_Solver:
         self.heuristic    = heuristic
         self.cost          = 0
 
-    def Solve(self):
+    def Solve(self):        #algorithm solving method
         startState = City_Node(self.start, 0, 0,
                                   self.start,
                                   self.goal)
 
         count = 0
         if self.heuristic == 1:
-            self.priorityQueue.put((startState.aerialdist, count, startState))
+            self.priorityQueue.put((startState.aerialdist, count, startState)) #priority = hearistic
         elif self.heuristic == 2:
             self.priorityQueue.put((startState.walkingdist, count, startState))
         while(not self.path and self.priorityQueue.qsize()):
@@ -157,7 +157,7 @@ class Greedy_Solver:
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
 
-class BFS_Solver:
+class BFS_Solver:       # Breadth-first search algorith class
     def __init__(self, start , goal):
         self.path          = []
         self.visitedQueue  = []
@@ -166,13 +166,13 @@ class BFS_Solver:
         self.goal          = goal
         self.cost          = 0
 
-    def Solve(self):
+    def Solve(self):    # algorithm solving method
         startState = City_Node(self.start, 0, 0,
                                   self.start,
                                   self.goal)
 
         count = 0
-        self.priorityQueue.put((count, startState))
+        self.priorityQueue.put((count, startState))     #priority = node number
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[1]
             if closestChild.name in self.visitedQueue:
@@ -191,14 +191,14 @@ class BFS_Solver:
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
 
-def SearchSheet(sheet, name):
+def SearchSheet(sheet, name):   # Searches first column of input spreadsheet for input string. returns row number
     for o in range(sheet.nrows):
         if (sheet.cell_value(o,0) == name):
             return o
 
-if __name__ == "__main__":
+if __name__ == "__main__":      # Main body of program
     try:
-        location = ("./DB_Cities.xls")
+        location = ("./DB_Cities.xls")      # defining spreadsheet path and opening sheets
         workbook = xlrd.open_workbook(location)
         aerial_sheet = workbook.sheet_by_index(0)
         walking_sheet = workbook.sheet_by_index(1)
@@ -209,39 +209,43 @@ if __name__ == "__main__":
         if (SearchSheet(driving_sheet, start1) == None):
             print("Starting point input invalid.")
             quit()
+
         goal1  = input("Enter the city that is the ending point: ")
         if (SearchSheet(driving_sheet, goal1) == None):
             print("Destination point input invalid.")
             quit()
+
         method = input("Enter 1 to use A*, 2 to use greedy search, 3 to use breadth-first search: ")
-        
         if int(method) == 1:
             heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
             if (int(heuristic) != 1 and int(heuristic) != 2):
                 print("Heuristic input invalid.")
                 quit()
             a = AStar_Solver(start1, goal1, int(heuristic))
+
         elif int(method) == 2:
             heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
             if (int(heuristic) != 1 and int(heuristic) != 2):
                 print("Heuristic input invalid.")
                 quit()
             a = Greedy_Solver(start1, goal1, int(heuristic))
+
         elif int(method) == 3:
             a = BFS_Solver(start1, goal1)
+
         else:
             print("Method input invalid.")
             quit()
         print("\nStarting...\n")
         a.Solve()
 
-        print("Solution:")
+        print("Solution:")      #printing solution found by algorithm
         for i in range(len(a.path)):
             print("\t{0}) {1}".format(i, a.path[i]))
         print("\nPath cost: %s" % a.cost)
-        print("\nVisited Nodes:")
+        print("\nVisited Nodes:")       #printing nodes visited by algorithm
         for i in range(len(a.visitedQueue)):
             print("\t{0}) {1}".format(i, a.visitedQueue[i]))
     except KeyboardInterrupt:
-        print(" Pressed, exiting program...")
+        print(" Pressed, exiting program...")   #exit program peacefully in case of user keyboard interrupt
         quit()
