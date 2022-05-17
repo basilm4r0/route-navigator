@@ -2,14 +2,6 @@ import xlrd
 from queue import PriorityQueue
 
 class Node(object):
-
-    '''
-    Steps:
-    1) Generate a list of all possible next Steps toward goal from current position
-    2) Store Children in PriorityQueue based on distance to goal, closest first
-    3) Select closest child and Repeat until goal reached or no more Children
-    '''
-
     def __init__(self, name, parent,
                  start = 0,
                  goal = 0):
@@ -69,7 +61,6 @@ class City_Node(Node):
         o = SearchSheet(walking_sheet, self.name)
         i = SearchSheet(walking_sheet, self.goal)
         walkingdist = int(walking_sheet.cell_value(o,i))
-        print(o, i, walkingdist)
         return walkingdist
 
     def CreateChildren(self):
@@ -119,7 +110,6 @@ class AStar_Solver:
                         self.priorityQueue.put((child.cost + child.aerialdist, count, child))
                     elif self.heuristic == 2:
                         self.priorityQueue.put((child.cost + child.walkingdist, count, child))
-                    print(child.name, child.cost, child.walkingdist, child.cost+child.walkingdist)
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -220,11 +210,31 @@ if __name__ == "__main__":
     walking_sheet = workbook.sheet_by_index(1)
     driving_sheet = workbook.sheet_by_index(2)
 
-    start1 = "Ramallah"
-    goal1  = "Safad"
-    print("Starting...")
 
-    a = AStar_Solver(start1, goal1, 1)
+    start1 = input("Enter the city that is the starting point: ")
+    if (SearchSheet(driving_sheet, start1) == None):
+        print("Starting point input invalid.")
+        quit()
+    goal1  = input("Enter the city that is the ending point: ")
+    if (SearchSheet(driving_sheet, goal1) == None):
+        print("Destination point input invalid.")
+        quit()
+    heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
+    if (int(heuristic) != 1 and int(heuristic) != 2):
+        print("Heuristic input invalid.")
+        quit()
+    method = input("Enter 1 to use A*, 2 to use greedy search, 3 to use breadth-first search: ")
+    print("\nStarting...\n")
+    
+    if int(method) == 1:
+        a = AStar_Solver(start1, goal1, int(heuristic))
+    elif int(method) == 2:
+        a = Greedy_Solver(start1, goal1, int(heuristic))
+    elif int(method) == 3:
+        a = BFS_Solver(start1, goal1, int(heuristic))
+    else:
+        print("Method input invalid.")
+        quit()
     a.Solve()
 
     print("Solution:")
