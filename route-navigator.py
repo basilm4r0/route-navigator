@@ -100,6 +100,8 @@ class AStar_Solver:
             self.priorityQueue.put((startState.cost + startState.walkingdist, count, startState))
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[2]
+            if closestChild.name in self.visitedQueue:
+                continue
             self.visitedQueue.append(closestChild.name)
             if (closestChild.name == self.goal):
                 self.path = closestChild.path
@@ -119,6 +121,88 @@ class AStar_Solver:
 
         return self.path
 
+class Greedy_Solver:
+    def __init__(self, start , goal, heuristic):
+        self.path          = []
+        self.visitedQueue  = []
+        self.priorityQueue = PriorityQueue()
+        self.start         = start
+        self.goal          = goal
+        self.heuristic    = heuristic
+        self.cost          = 0
+
+    def Solve(self):
+        startState = City_Node(self.start, 0, 0,
+                                  self.start,
+                                  self.goal)
+
+        count = 0
+        if self.heuristic == 1:
+            self.priorityQueue.put((startState.aerialdist, count, startState))
+        elif self.heuristic == 2:
+            self.priorityQueue.put((startState.walkingdist, count, startState))
+        while(not self.path and self.priorityQueue.qsize()):
+            closestChild = self.priorityQueue.get()[2]
+            if closestChild.name in self.visitedQueue:
+                continue
+            self.visitedQueue.append(closestChild.name)
+            if (closestChild.name == self.goal):
+                self.path = closestChild.path
+                self.cost = closestChild.cost
+                break
+            closestChild.CreateChildren()
+            for child in closestChild.children:
+                if child.name not in self.visitedQueue:
+                    count += 1
+                    if self.heuristic == 1:
+                        self.priorityQueue.put((child.aerialdist, count, child))
+                    elif self.heuristic == 2:
+                        self.priorityQueue.put((child.walkingdist, count, child))
+
+        if not self.path:
+            print("Goal of %s is not possible!" % (self.goal))
+
+class BFS_Solver:
+    def __init__(self, start , goal, heuristic):
+        self.path          = []
+        self.visitedQueue  = []
+        self.priorityQueue = PriorityQueue()
+        self.start         = start
+        self.goal          = goal
+        self.heuristic    = heuristic
+        self.cost          = 0
+
+    def Solve(self):
+        startState = City_Node(self.start, 0, 0,
+                                  self.start,
+                                  self.goal)
+
+        count = 0
+        if self.heuristic == 1:
+            self.priorityQueue.put((count, startState))
+        elif self.heuristic == 2:
+            self.priorityQueue.put((count, startState))
+        while(not self.path and self.priorityQueue.qsize()):
+            closestChild = self.priorityQueue.get()[1]
+            if closestChild.name in self.visitedQueue:
+                continue
+            self.visitedQueue.append(closestChild.name)
+            if (closestChild.name == self.goal):
+                self.path = closestChild.path
+                self.cost = closestChild.cost
+                break
+            closestChild.CreateChildren()
+            for child in closestChild.children:
+                if child.name not in self.visitedQueue:
+                    count += 1
+                    if self.heuristic == 1:
+                        self.priorityQueue.put((count, child))
+                    elif self.heuristic == 2:
+                        self.priorityQueue.put((count, child))
+
+        if not self.path:
+            print("Goal of %s is not possible!" % (self.goal))
+
 def SearchSheet(sheet, name):
     for o in range(sheet.nrows):
         if (sheet.cell_value(o,0) == name):
@@ -131,18 +215,18 @@ if __name__ == "__main__":
     walking_sheet = workbook.sheet_by_index(1)
     driving_sheet = workbook.sheet_by_index(2)
 
-    start1 = "Dura"
+    start1 = "Ramallah"
     goal1  = "Safad"
     print("Starting...")
 
     a = AStar_Solver(start1, goal1, 2)
     a.Solve()
 
-    print("Solution:\n")
+    print("Solution:")
     for i in range(len(a.path)):
-        print("{0}) {1}".format(i, a.path[i]))
-    print("Path cost: %s" % a.cost)
-    print("\nVisited Nodes:\n")
+        print("\t{0}) {1}".format(i, a.path[i]))
+    print("\nPath cost: %s" % a.cost)
+    print("\nVisited Nodes:")
     for i in range(len(a.visitedQueue)):
-        print("{0}) {1}".format(i, a.visitedQueue[i]))
+        print("\t{0}) {1}".format(i, a.visitedQueue[i]))
 
