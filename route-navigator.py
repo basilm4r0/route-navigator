@@ -1,7 +1,7 @@
-import xlrd
+import xlrd     #library for reading .xls files
 from queue import PriorityQueue
 
-class Node(object):
+class Node(object):     #parent class for node object
     def __init__(self, name, parent,
                  start = 0,
                  goal = 0):
@@ -32,8 +32,8 @@ class Node(object):
     def CreateChildren(self):
         pass
 
-class City_Node(Node):
-    def __init__(self,name,parent,cost,
+class City_Node(Node):      #child class for city nodes
+    def __init__(self,name,parent,cost,     #city node object constructor
                  start = 0,
                  goal = 0):
 
@@ -45,7 +45,7 @@ class City_Node(Node):
         self.aerialdist = self.GetAerialDistance()
         self.walkingdist = self.GetWalkingDistance()
 
-    def GetAerialDistance(self):
+    def GetAerialDistance(self):        #retrieves aerial distance from spreadsheet
 
         if self.name == self.goal:
             return 0
@@ -54,7 +54,7 @@ class City_Node(Node):
         aerialdist = int(aerial_sheet.cell_value(o,i))
         return aerialdist
 
-    def GetWalkingDistance(self):
+    def GetWalkingDistance(self):       #retrieves walking distance from spreadsheet
 
         if self.name == self.goal:
             return 0
@@ -63,7 +63,7 @@ class City_Node(Node):
         walkingdist = int(walking_sheet.cell_value(o,i))
         return walkingdist
 
-    def CreateChildren(self):
+    def CreateChildren(self):           #expands city node (creates children)
         if not self.children:
             o = SearchSheet(driving_sheet, self.name)
             for i in range(1, driving_sheet.ncols):
@@ -73,7 +73,7 @@ class City_Node(Node):
                     child = City_Node(name, self, int(driving_sheet.cell_value(o,i)))
                     self.children.append(child)
 
-class AStar_Solver:
+class AStar_Solver:         #A* algorithm solver class
     def __init__(self, start , goal, heuristic):
         self.path          = []
         self.visitedQueue  = []
@@ -158,13 +158,12 @@ class Greedy_Solver:
             print("Goal of %s is not possible!" % (self.goal))
 
 class BFS_Solver:
-    def __init__(self, start , goal, heuristic):
+    def __init__(self, start , goal):
         self.path          = []
         self.visitedQueue  = []
         self.priorityQueue = PriorityQueue()
         self.start         = start
         self.goal          = goal
-        self.heuristic    = heuristic
         self.cost          = 0
 
     def Solve(self):
@@ -173,10 +172,7 @@ class BFS_Solver:
                                   self.goal)
 
         count = 0
-        if self.heuristic == 1:
-            self.priorityQueue.put((count, startState))
-        elif self.heuristic == 2:
-            self.priorityQueue.put((count, startState))
+        self.priorityQueue.put((count, startState))
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[1]
             if closestChild.name in self.visitedQueue:
@@ -190,10 +186,7 @@ class BFS_Solver:
             for child in closestChild.children:
                 if child.name not in self.visitedQueue:
                     count += 1
-                    if self.heuristic == 1:
-                        self.priorityQueue.put((count, child))
-                    elif self.heuristic == 2:
-                        self.priorityQueue.put((count, child))
+                    self.priorityQueue.put((count, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -204,44 +197,51 @@ def SearchSheet(sheet, name):
             return o
 
 if __name__ == "__main__":
-    location = ("./DB_Cities.xls")
-    workbook = xlrd.open_workbook(location)
-    aerial_sheet = workbook.sheet_by_index(0)
-    walking_sheet = workbook.sheet_by_index(1)
-    driving_sheet = workbook.sheet_by_index(2)
+    try:
+        location = ("./DB_Cities.xls")
+        workbook = xlrd.open_workbook(location)
+        aerial_sheet = workbook.sheet_by_index(0)
+        walking_sheet = workbook.sheet_by_index(1)
+        driving_sheet = workbook.sheet_by_index(2)
 
 
-    start1 = input("Enter the city that is the starting point: ")
-    if (SearchSheet(driving_sheet, start1) == None):
-        print("Starting point input invalid.")
-        quit()
-    goal1  = input("Enter the city that is the ending point: ")
-    if (SearchSheet(driving_sheet, goal1) == None):
-        print("Destination point input invalid.")
-        quit()
-    heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
-    if (int(heuristic) != 1 and int(heuristic) != 2):
-        print("Heuristic input invalid.")
-        quit()
-    method = input("Enter 1 to use A*, 2 to use greedy search, 3 to use breadth-first search: ")
-    print("\nStarting...\n")
-    
-    if int(method) == 1:
-        a = AStar_Solver(start1, goal1, int(heuristic))
-    elif int(method) == 2:
-        a = Greedy_Solver(start1, goal1, int(heuristic))
-    elif int(method) == 3:
-        a = BFS_Solver(start1, goal1, int(heuristic))
-    else:
-        print("Method input invalid.")
-        quit()
-    a.Solve()
+        start1 = input("Enter the city that is the starting point: ")
+        if (SearchSheet(driving_sheet, start1) == None):
+            print("Starting point input invalid.")
+            quit()
+        goal1  = input("Enter the city that is the ending point: ")
+        if (SearchSheet(driving_sheet, goal1) == None):
+            print("Destination point input invalid.")
+            quit()
+        method = input("Enter 1 to use A*, 2 to use greedy search, 3 to use breadth-first search: ")
+        
+        if int(method) == 1:
+            heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
+            if (int(heuristic) != 1 and int(heuristic) != 2):
+                print("Heuristic input invalid.")
+                quit()
+            a = AStar_Solver(start1, goal1, int(heuristic))
+        elif int(method) == 2:
+            heuristic = input("Enter 1 to use aerial distance as a heuristic or 2 to use walking distance as a heuristic: ")
+            if (int(heuristic) != 1 and int(heuristic) != 2):
+                print("Heuristic input invalid.")
+                quit()
+            a = Greedy_Solver(start1, goal1, int(heuristic))
+        elif int(method) == 3:
+            a = BFS_Solver(start1, goal1)
+        else:
+            print("Method input invalid.")
+            quit()
+        print("\nStarting...\n")
+        a.Solve()
 
-    print("Solution:")
-    for i in range(len(a.path)):
-        print("\t{0}) {1}".format(i, a.path[i]))
-    print("\nPath cost: %s" % a.cost)
-    print("\nVisited Nodes:")
-    for i in range(len(a.visitedQueue)):
-        print("\t{0}) {1}".format(i, a.visitedQueue[i]))
-
+        print("Solution:")
+        for i in range(len(a.path)):
+            print("\t{0}) {1}".format(i, a.path[i]))
+        print("\nPath cost: %s" % a.cost)
+        print("\nVisited Nodes:")
+        for i in range(len(a.visitedQueue)):
+            print("\t{0}) {1}".format(i, a.visitedQueue[i]))
+    except KeyboardInterrupt:
+        print(" Pressed, exiting program...")
+        quit()
