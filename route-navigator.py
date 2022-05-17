@@ -224,7 +224,7 @@ if __name__ == "__main__":
     goal1  = "Safad"
     print("Starting...")
 
-    a = AStar_Solver(start1, goal1, 2)
+    a = AStar_Solver(start1, goal1, 1)
     a.Solve()
 
     print("Solution:")
