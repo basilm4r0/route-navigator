@@ -85,7 +85,7 @@ class AStar_Solver:
         self.priorityQueue = PriorityQueue()
         self.start         = start
         self.goal          = goal
-        self.heuristric    = heuristic
+        self.heuristic    = heuristic
         self.cost          = 0
 
     def Solve(self):
@@ -94,19 +94,25 @@ class AStar_Solver:
                                   self.goal)
 
         count = 0
-        self.priorityQueue.put((startState.cost + startState.aerialdist, count, startState))
+        if self.heuristic == 1:
+            self.priorityQueue.put((startState.cost + startState.aerialdist, count, startState))
+        elif self.heuristic == 2:
+            self.priorityQueue.put((startState.cost + startState.walkingdist, count, startState))
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[2]
-            closestChild.CreateChildren()
             self.visitedQueue.append(closestChild.name)
             if (closestChild.name == self.goal):
                 self.path = closestChild.path
                 self.cost = closestChild.cost
                 break
+            closestChild.CreateChildren()
             for child in closestChild.children:
                 if child.name not in self.visitedQueue:
                     count += 1
-                    self.priorityQueue.put((child.cost + child.aerialdist, count, child))
+                    if self.heuristic == 1:
+                        self.priorityQueue.put((child.cost + child.aerialdist, count, child))
+                    elif self.heuristic == 2:
+                        self.priorityQueue.put((child.cost + child.walkingdist, count, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -129,9 +135,14 @@ if __name__ == "__main__":
     goal1  = "Safad"
     print("Starting...")
 
-    a = AStar_Solver(start1, goal1, 1)
+    a = AStar_Solver(start1, goal1, 2)
     a.Solve()
 
+    print("Solution:\n")
     for i in range(len(a.path)):
         print("{0}) {1}".format(i, a.path[i]))
     print("Path cost: %s" % a.cost)
+    print("\nVisited Nodes:\n")
+    for i in range(len(a.visitedQueue)):
+        print("{0}) {1}".format(i, a.visitedQueue[i]))
+
