@@ -31,7 +31,10 @@ class Node(object):
             self.start  = start
             self.goal   = goal
 
-    def GetDistance(self):
+    def GetAerialDistance(self):
+        pass
+
+    def GetWalkingDistance(self):
         pass
 
     def CreateChildren(self):
@@ -44,11 +47,11 @@ class City_Node(Node):
 
         super(City_Node, self).__init__(name, parent, start, goal)
         if parent:
-            self.cost = float(parent.cost) + float(cost)
+            self.cost = int(parent.cost) + int(cost)
         else:
             self.cost = cost
         self.aerialdist = self.GetAerialDistance()
-        self.walkindist = self.GetWalkingDistance()
+        self.walkingdist = self.GetWalkingDistance()
 
     def GetAerialDistance(self):
 
@@ -56,7 +59,7 @@ class City_Node(Node):
             return 0
         o = SearchSheet(aerial_sheet, self.name)
         i = SearchSheet(aerial_sheet, self.goal)
-        aerialdist = float(aerial_sheet.cell_value(o,i))
+        aerialdist = int(aerial_sheet.cell_value(o,i))
         return aerialdist
 
     def GetWalkingDistance(self):
@@ -65,7 +68,8 @@ class City_Node(Node):
             return 0
         o = SearchSheet(walking_sheet, self.name)
         i = SearchSheet(walking_sheet, self.goal)
-        walkingdist = float(walking_sheet.cell_value(o,i))
+        walkingdist = int(walking_sheet.cell_value(o,i))
+        print(o, i, walkingdist)
         return walkingdist
 
     def CreateChildren(self):
@@ -75,7 +79,7 @@ class City_Node(Node):
                 
                 if (str(driving_sheet.cell_value(o,i)) != ""):
                     name = driving_sheet.cell_value(0,i)
-                    child = City_Node(name, self, float(driving_sheet.cell_value(o,i)))
+                    child = City_Node(name, self, int(driving_sheet.cell_value(o,i)))
                     self.children.append(child)
 
 class AStar_Solver:
@@ -98,7 +102,7 @@ class AStar_Solver:
             self.priorityQueue.put((startState.cost + startState.aerialdist, count, startState))
         elif self.heuristic == 2:
             self.priorityQueue.put((startState.cost + startState.walkingdist, count, startState))
-        while(not self.path and self.priorityQueue.qsize()):
+        while(self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[2]
             if closestChild.name in self.visitedQueue:
                 continue
@@ -115,6 +119,7 @@ class AStar_Solver:
                         self.priorityQueue.put((child.cost + child.aerialdist, count, child))
                     elif self.heuristic == 2:
                         self.priorityQueue.put((child.cost + child.walkingdist, count, child))
+                    print(child.name, child.cost, child.walkingdist, child.cost+child.walkingdist)
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
