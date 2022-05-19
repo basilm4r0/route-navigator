@@ -39,7 +39,7 @@ class City_Node(Node):      #child class for city nodes
 
         super(City_Node, self).__init__(name, parent, start, goal)
         if parent:
-            self.cost = int(parent.cost) + int(cost)
+            self.cost = float(parent.cost) + float(cost)
         else:
             self.cost = cost
         self.aerialdist = self.GetAerialDistance()
@@ -51,7 +51,7 @@ class City_Node(Node):      #child class for city nodes
             return 0
         o = SearchSheet(aerial_sheet, self.name)
         i = SearchSheet(aerial_sheet, self.goal)
-        aerialdist = int(aerial_sheet.cell_value(o,i))
+        aerialdist = float(aerial_sheet.cell_value(o,i))
         return aerialdist
 
     def GetWalkingDistance(self):       #retrieves walking distance from spreadsheet
@@ -60,7 +60,7 @@ class City_Node(Node):      #child class for city nodes
             return 0
         o = SearchSheet(walking_sheet, self.name)
         i = SearchSheet(walking_sheet, self.goal)
-        walkingdist = int(walking_sheet.cell_value(o,i))
+        walkingdist = float(walking_sheet.cell_value(o,i))
         return walkingdist
 
     def CreateChildren(self):           #expands city node (creates children)
@@ -69,7 +69,7 @@ class City_Node(Node):      #child class for city nodes
             for i in range(1, driving_sheet.ncols):
                 if (str(driving_sheet.cell_value(o,i)) != ""):
                     name = driving_sheet.cell_value(0,i)
-                    child = City_Node(name, self, int(driving_sheet.cell_value(o,i)))
+                    child = City_Node(name, self, float(driving_sheet.cell_value(o,i)))
                     self.children.append(child)
 
 class AStar_Solver:         #A* algorithm solver class
