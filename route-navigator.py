@@ -67,7 +67,6 @@ class City_Node(Node):      #child class for city nodes
         if not self.children:
             o = SearchSheet(driving_sheet, self.name)
             for i in range(1, driving_sheet.ncols):
-                
                 if (str(driving_sheet.cell_value(o,i)) != ""):
                     name = driving_sheet.cell_value(0,i)
                     child = City_Node(name, self, int(driving_sheet.cell_value(o,i)))
