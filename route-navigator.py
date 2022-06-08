@@ -94,8 +94,6 @@ class AStar_Solver:         #A* algorithm solver class
             self.priorityQueue.put((startState.cost + startState.walkingdist, count, startState))
         while(self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[2]
-            if closestChild.name in self.visitedQueue:
-                continue
             self.visitedQueue.append(closestChild.name)
             if (closestChild.name == self.goal):
                 self.path = closestChild.path
@@ -103,12 +101,11 @@ class AStar_Solver:         #A* algorithm solver class
                 break
             closestChild.CreateChildren()
             for child in closestChild.children:
-                if child.name not in self.visitedQueue:
-                    count += 1
-                    if self.heuristic == 1:
-                        self.priorityQueue.put((child.cost + child.aerialdist, count, child))
-                    elif self.heuristic == 2:
-                        self.priorityQueue.put((child.cost + child.walkingdist, count, child))
+                count += 1
+                if self.heuristic == 1:
+                    self.priorityQueue.put((child.cost + child.aerialdist, count, child))
+                elif self.heuristic == 2:
+                    self.priorityQueue.put((child.cost + child.walkingdist, count, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -137,8 +134,6 @@ class Greedy_Solver:        #Greedy search pathfinding algorithm class
             self.priorityQueue.put((startState.walkingdist, count, startState))
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[2]
-            if closestChild.name in self.visitedQueue:
-                continue
             self.visitedQueue.append(closestChild.name)
             if (closestChild.name == self.goal):
                 self.path = closestChild.path
@@ -146,12 +141,11 @@ class Greedy_Solver:        #Greedy search pathfinding algorithm class
                 break
             closestChild.CreateChildren()
             for child in closestChild.children:
-                if child.name not in self.visitedQueue:
-                    count += 1
-                    if self.heuristic == 1:
-                        self.priorityQueue.put((child.aerialdist, count, child))
-                    elif self.heuristic == 2:
-                        self.priorityQueue.put((child.walkingdist, count, child))
+                count += 1
+                if self.heuristic == 1:
+                    self.priorityQueue.put((child.aerialdist, count, child))
+                elif self.heuristic == 2:
+                    self.priorityQueue.put((child.walkingdist, count, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
@@ -174,8 +168,6 @@ class BFS_Solver:       # Breadth-first search algorith class
         self.priorityQueue.put((count, startState))     #priority = node number
         while(not self.path and self.priorityQueue.qsize()):
             closestChild = self.priorityQueue.get()[1]
-            if closestChild.name in self.visitedQueue:
-                continue
             self.visitedQueue.append(closestChild.name)
             if (closestChild.name == self.goal):
                 self.path = closestChild.path
@@ -183,9 +175,8 @@ class BFS_Solver:       # Breadth-first search algorith class
                 break
             closestChild.CreateChildren()
             for child in closestChild.children:
-                if child.name not in self.visitedQueue:
-                    count += 1
-                    self.priorityQueue.put((count, child))
+                count += 1
+                self.priorityQueue.put((count, child))
 
         if not self.path:
             print("Goal of %s is not possible!" % (self.goal))
